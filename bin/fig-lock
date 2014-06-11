@@ -1,0 +1,4 @@
+#!/usr/bin/env ruby
+$:.unshift(File.join(__dir__, '..', 'lib'))
+require 'fig/lock/cli'
+
