@@ -21,6 +21,26 @@ Or install it yourself as:
 
 ## Usage
 
+fig-lock produces fig.lock files from fig.yml files, locking images to specific versions.
+eg:
+
+fig.yml:
+```
+---
+image: ubuntu
+image: my.docker-registry.com/repo/myimage
+```
+
+resulting fig.lock:
+```
+---
+image: ubuntu:14.04
+image: my.docker-registry.com/repo/myimage:0.0.1
+```
+
+Currently, fig-lock only works properly with images that have been explicitly tagged. However, the next 
+iteration should use hashes if tags are not available.
+
 ### Install
 The *install* command uses docker to retrieve all images
 defined in fig.lock. If no fig.lock file exists, one will
