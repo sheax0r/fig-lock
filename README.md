@@ -16,7 +16,7 @@ You want whatever *something* is to be versioned because versioning is important
 
 This is why *Fig::Lock* exists. *Fig::Lock* lets you specify a fig.yml file containing images that use the ```latest``` tag. It generates fig.lock files by pulling down these images, figuring out what explicit tag latest maps to, and then generating a fig.lock file that uses these exact images. Then you can run your integration tests using this file, check it into source control, etc. The point is that you get a file that represents all the versions of the things in your system, so you can use this to reproduce it exactly.
 
-It's pretty much the fig/docker equivalent of ```Gemfile.lock```.
+It's pretty much the fig equivalent of ```Gemfile.lock```.
 
 ## Installation
 
