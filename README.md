@@ -9,14 +9,17 @@ of those versions, generates a fig.lock file.
 
 ## Um, What?
 
+### The short answer
+```fig.lock``` is to ```fig.yml``` as ```Gemfile.lock``` is to ```Gemfile```
+
+### The longer answer
+
 Okay so, suppose you have a bunch of docker images. You want these images to work together to do *something*.
 You want whatever *something* is to be versioned because versioning is important - it helps you to figure out when a bug were introduced. It helps you roll back to a good version if something goes terribly wrong. All sorts of reasons!
 
-[fig](http://orchardup.github.io/fig/index.html) lets you describe your images and how they interact. But if you use ```latest``` tags in your image (or really anything other than explicit version locking that you do manually by always using specific tags for your images), it doesn't help you keep track of your versions - it just uses whatever docker images are installed locally, or fetches the specific tags from registries. This approach is fine if you're dealing with images that don't change very often. But if you're working in an environment where several images in different source repositories are under heavy development, it can be a problem to have to manually update the fig.yml file, and integration tests that auto-update are just not feasible.
+[Fig](http://orchardup.github.io/fig/index.html) lets you describe your images and how they interact. But if you use ```latest``` tags in your image (or really anything other than explicit version locking that you do manually by always using specific tags for your images), it doesn't help you keep track of your versions - it just uses whatever docker images are installed locally, or fetches the specific tags from registries. This approach is fine if you're dealing with images that don't change very often. But if you're working in an environment where several images in different source repositories are under heavy development, it can be a problem to have to manually update the fig.yml file, and integration tests that auto-update are just not feasible.
 
-This is why *Fig::Lock* exists. *Fig::Lock* lets you specify a fig.yml file containing images that use the ```latest``` tag. It generates fig.lock files by pulling down these images, figuring out what explicit tag latest maps to, and then generating a fig.lock file that uses these exact images. Then you can run your integration tests using this file, check it into source control, etc. The point is that you get a file that represents all the versions of the things in your system, so you can use this to reproduce it exactly.
-
-It's pretty much the fig equivalent of ```Gemfile.lock```.
+This is why *Fig::Lock* exists. *Fig::Lock* lets you specify a fig.yml file containing images that use the ```latest``` tag. It generates fig.lock files by pulling down these images, figuring out what explicit tag latest maps to, and then generating a ```fig.lock``` file that uses these exact images. Then you can run your integration tests using this file, check it into source control, etc. The point is that you get a file that represents all the versions of the things in your system, so you can use this to reproduce it exactly.
 
 ## Installation
 
