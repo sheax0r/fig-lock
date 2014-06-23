@@ -85,7 +85,7 @@ module Fig
         image = v['image']
         if image
           log.info "Fetching #{image} ..."
-          system "sudo docker pull #{image}"
+          system "sudo docker pull #{image}:latest"
           fail "Unable to fetch image: #{image}.\n\tExit code:#{$?.exitstatus}" unless $?.exitstatus.zero?
         end
       end
