@@ -84,8 +84,9 @@ module Fig
       hash.each do |k,v|
         image = v['image']
         if image
+          image = "#{image}:latest" unless image.index(':')
           log.info "Fetching #{image} ..."
-          system "sudo docker pull #{image}:latest"
+          system "sudo docker pull #{image}"
           fail "Unable to fetch image: #{image}.\n\tExit code:#{$?.exitstatus}" unless $?.exitstatus.zero?
         end
       end
