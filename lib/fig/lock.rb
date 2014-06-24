@@ -81,7 +81,9 @@ module Fig
           fail "No matching version found for hash #{latest}" unless version
 
           # Update hash
-          v['image'] = "#{image[0..image.rindex(':')-1]}:#{version}"
+          result = "#{image[0..image.rindex(':')-1]}:#{version}"
+          v['image'] = result
+          log.info "Resolved image: #{result}"
         end
       end
     end
