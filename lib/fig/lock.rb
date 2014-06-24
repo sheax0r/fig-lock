@@ -1,4 +1,5 @@
 require 'yaml'
+require 'fig/lock/docker_client'
 require 'fig/lock/log'
 require 'fig/lock/version'
 
@@ -46,10 +47,7 @@ module Fig
     def update
       log.info "Generating lock file for #{file} ..."
       hash = YAML.load(File.read(file))
-
-      fetch_images(hash)
       select_latest(hash)
-
       File.write(lock_file, hash.to_yaml)
     end
 
@@ -67,13 +65,23 @@ module Fig
       log.info "Selecting latest tags:"
       hash.each do |k,v|
         image = v['image']
+        image = "#{image}:latest" unless image.index(':')
+        log.info "Selecting latest tag for #{image} ..."
         unless image.nil?
-          output = `sudo docker images #{image}`
-          fail "Unable to list image: #{image}.\n\tExit code:#{$?.exitstatus}\n\tOutput:#{output}" unless $?.exitstatus.zero?
-          tag = output.split("\n")[1].split(' ')[1]
-          tagged_image = "#{image}:#{tag}"
-          log.info "Resolved: #{tagged_image}"
-          v['image'] = tagged_image
+          # Fetch tags
+          tags = docker_client.tags(image)
+          latest = tags['latest']
+          fail "Image #{image} has no latest tag" if latest.nil?
+
+          # Figure out which one corresponds to "latest"
+          version = tags.detect{|k,v|
+            v == latest && k != 'latest'
+          }
+          version = version[0] if version
+          fail "No matching version found for hash #{latest}" unless version
+
+          # Update hash
+          v['image'] = "#{image[0..image.rindex(':')-1]}:#{version}"
         end
       end
     end
@@ -84,7 +92,6 @@ module Fig
       hash.each do |k,v|
         image = v['image']
         if image
-          image = "#{image}:latest" unless image.index(':')
           log.info "Fetching #{image} ..."
           system "sudo docker pull #{image}"
           fail "Unable to fetch image: #{image}.\n\tExit code:#{$?.exitstatus}" unless $?.exitstatus.zero?
@@ -97,6 +104,10 @@ module Fig
       Defaults.opts.merge(opts).tap do |hash|
         fail("file must be specified") unless hash[:file]
       end
+    end
+
+    def docker_client
+      @docker_client ||= DockerClient.new
     end
   end
 
@@ -114,4 +125,6 @@ module Fig
       end
     end
   end
+
+
 end

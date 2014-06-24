@@ -1,14 +1,4 @@
-$:.unshift(File.join(__dir__, '..', '..', 'lib'))
-
-RSpec.configure do |config|
-  require 'simplecov'
-  SimpleCov.add_filter 'vendor'
-  SimpleCov.add_filter 'spec'
-  SimpleCov.start
-end
-
-
-require 'fig/lock'
+require 'spec_helper'
 
 module Fig
 
@@ -45,6 +35,7 @@ module Fig
         allow(File).to receive(:directory?).with('fig.yml'){false}
         allow(File).to receive(:read).with('fig.yml'){yaml}
         allow(File).to receive(:read).with('fig.lock'){yaml}
+        allow(Lock::DockerClient).to receive(:new){docker_client}
       end
 
       it 'should install' do
@@ -65,11 +56,7 @@ module Fig
 
       it 'should update' do
         lock = Fig::Lock.new(registry: 'some.docker.com', file:'fig.yml')
-
-        expect(lock).to receive(:system).with('sudo docker pull some.docker.com/atlas/api'){true}
-        expect(lock).to receive(:`).with('sudo docker images some.docker.com/atlas/api'){docker_image_output}
         expect(File).to receive(:write).with('fig.lock', expected_fig_lock)
-
         lock.update
       end
 
@@ -94,6 +81,14 @@ some.docker.com/atlas/api         20140611142604      784dfb100eb0        4 hour
 web:
   image: some.docker.com/atlas/api
         eos
+      end
+
+      def docker_client
+        @docker_client ||= double('docker-client', tags: tags)
+      end
+
+      def tags
+        @tags ||= {'latest'=>'hash', '20140611142604'=>'hash'}
       end
     end
   end
