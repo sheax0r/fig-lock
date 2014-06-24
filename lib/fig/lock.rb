@@ -48,7 +48,11 @@ module Fig
       log.info "Generating lock file for #{file} ..."
       hash = YAML.load(File.read(file))
       select_latest(hash)
+
+      log.info "Writing lock file #{lock_file} ..."
       File.write(lock_file, hash.to_yaml)
+
+      log.info "Done."
     end
 
     private
