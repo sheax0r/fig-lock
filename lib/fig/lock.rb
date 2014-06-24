@@ -63,27 +63,39 @@ module Fig
     # Select the latest version for images in the fig hash. Updates the input hash.
     def select_latest(hash)
       log.info "Selecting latest tags:"
+
+      resolved_tags = {}
+
       hash.each do |k,v|
         image = v['image']
         image = "#{image}:latest" unless image.index(':')
         log.info "Selecting latest tag for #{image} ..."
-        unless image.nil?
-          # Fetch tags
-          tags = docker_client.tags(image)
-          latest = tags['latest']
-          fail "Image #{image} has no latest tag" if latest.nil?
 
-          # Figure out which one corresponds to "latest"
-          version = tags.detect{|k,v|
-            v == latest && k != 'latest'
-          }
-          version = version[0] if version
-          fail "No matching version found for hash #{latest}" unless version
+
+        unless image.nil?
+          result = resolved_tags[image]
+          if result
+            log.info "Using previously resolved image: #{result}"
+          else
+            # Fetch tags
+            tags = docker_client.tags(image)
+            latest = tags['latest']
+            fail "Image #{image} has no latest tag" if latest.nil?
+
+            # Figure out which one corresponds to "latest"
+            version = tags.detect{|k,v|
+              v == latest && k != 'latest'
+            }
+            version = version[0] if version
+            fail "No matching version found for hash #{latest}" unless version
+
+            result = "#{image[0..image.rindex(':')-1]}:#{version}"
+            log.info "Resolved image: #{result}"
+            resolved_tags[image] = result
+          end
 
           # Update hash
-          result = "#{image[0..image.rindex(':')-1]}:#{version}"
           v['image'] = result
-          log.info "Resolved image: #{result}"
         end
       end
     end
