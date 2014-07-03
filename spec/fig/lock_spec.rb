@@ -31,6 +31,7 @@ module Fig
     context 'instance operations' do
 
       before :each do
+        allow(File).to receive(:exists?).with('fig.lock'){false}
         allow(File).to receive(:exists?).with('fig.yml'){true}
         allow(File).to receive(:directory?).with('fig.yml'){false}
         allow(File).to receive(:read).with('fig.yml'){yaml}

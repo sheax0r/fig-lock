@@ -70,6 +70,8 @@ module Fig
 
       resolved_tags = {}
 
+      old_lock_yaml = lock_yaml
+
       hash.each do |k,v|
         image = v['image']
         image = "#{image}:latest" unless image.index(':')
@@ -87,7 +89,6 @@ module Fig
 
             # Figure out which one corresponds to "latest"
             version = tags.detect{|k,v|
-              puts "#{k}: #{v}"
               v == latest && k != 'latest'
             }
             version = version[0] if version
@@ -99,13 +100,19 @@ module Fig
           end
 
           # Update hash
-          if v['image'] == result
-            log.info "Component #{k} already using #{result}"
+          v['image'] = result
+          if old_lock_yaml && old_lock_yaml[k] && old_lock_yaml[k]['image'] == result
+            log.debug "Component #{k} already using tag: #{result}"
           else
-            log.info "Component #{k} updated to #{result}"
-            v['image'] = result
+            log.info "Component #{k} updated to tag: #{result}"
           end
         end
+      end
+    end
+
+    def lock_yaml
+      if File.exists?(lock_file)
+        YAML.load(File.read(lock_file))
       end
     end
 
