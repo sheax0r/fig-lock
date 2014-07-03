@@ -75,11 +75,10 @@ module Fig
         image = "#{image}:latest" unless image.index(':')
         log.info "Selecting latest tag for #{image} ..."
 
-
         unless image.nil?
           result = resolved_tags[image]
           if result
-            log.info "Using previously resolved image: #{result}"
+            log.debug "Using previously resolved image: #{result}"
           else
             # Fetch tags
             tags = docker_client.tags(image)
@@ -88,18 +87,24 @@ module Fig
 
             # Figure out which one corresponds to "latest"
             version = tags.detect{|k,v|
+              puts "#{k}: #{v}"
               v == latest && k != 'latest'
             }
             version = version[0] if version
             fail "No matching version found for hash #{latest}" unless version
 
             result = "#{image[0..image.rindex(':')-1]}:#{version}"
-            log.info "Resolved image: #{result}"
+            log.debug "Resolved image: #{result}"
             resolved_tags[image] = result
           end
 
           # Update hash
-          v['image'] = result
+          if v['image'] == result
+            log.info "Component #{k} already using #{result}"
+          else
+            log.info "Component #{k} updated to #{result}"
+            v['image'] = result
+          end
         end
       end
     end
