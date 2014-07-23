@@ -74,6 +74,7 @@ module Fig
 
       hash.each do |k,v|
         image = v['image']
+        continue unless image
         image = "#{image}:latest" unless image.index(':')
         log.info "Selecting latest tag for #{image} ..."
 
